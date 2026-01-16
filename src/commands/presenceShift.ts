@@ -3,23 +3,34 @@ import { DiscordCommand, DiscordCommandExecute } from "../structures/DiscordComm
 import { getMembers } from "../db/actions/getMembers";
 import { addShift, Shift } from "../db/actions/addShift";
 import { Participation } from "../db/actions/addShiftParticipants";
+import { hasDuplicate } from "../utils/hasDuplicate";
 
-function hasDuplicate(arr: string[]) {
-	const sorted_arr = arr.slice().sort();
-	for (let i = 0; i < sorted_arr.length - 1; i++) {
-		if (sorted_arr[i + 1] == sorted_arr[i]) {
-			return true;
-		}
-	}
-	return false;
+const slashCommand = new SlashCommandBuilder()
+	.setName("presence-shift")
+	.setDescription("Ajouter une nouvelle présence shift")
+	.addStringOption(opt => opt.setName("referent").setAutocomplete(true).setRequired(true).setDescription("Qui était référent du shift ?"))
+	.addStringOption(opt => opt.setName("date").setRequired(true).setDescription("Quel jour **(aaaa-MM-dd)**"))
+	.addStringOption(opt => opt.setName("period").setRequired(true).addChoices({ name: "midi", value: "noon" }, { name: "soir", value: "evening" }).setDescription("midi ou soir ?"))
+	.addStringOption(opt => opt.setName("caisse").setAutocomplete(true).setDescription("Qui était à la caisse ?"))
+	.addStringOption(opt => opt.setName("wrap").setAutocomplete(true).setDescription("Qui a fait les wraps ?"))
+	.addStringOption(opt => opt.setName("croq").setAutocomplete(true).setDescription("Qui a fait les croqs ?"))
+	.addStringOption(opt => opt.setName("decoupe").setAutocomplete(true).setDescription("Qui était le commis de service ?"))
+	.addStringOption(opt => opt.setName("polyvalent").setAutocomplete(true).setDescription("Qui était le branle-couille ?"))
+
+const displayRoleMap: Record<string, string> = {
+	cashier: "caissier",
+	wrap: "wraps",
+	croq: "croque-monsieurs",
+	versatile: "polyvalent"
 }
 
 function createShiftEmbed(shift: Shift) {
 	const period = shift.date.period;
 	return new EmbedBuilder()
-		.setTitle(`Shift du \`\`${shift.date.day}\`\` ${period === "noon" ? "midi" : "soir"}`)
-		.setColor(period === "noon" ? "Blue" : "DarkBlue")
-		.setAuthor({ name: "Coordinateur Discord" })
+		.setTitle(`__Shift du __\`\`${shift.date.day}\`\`__ ${period === "noon" ? "midi" : "soir"} host par \`\`${shift.referentLogin}\`\`__`)
+		.setColor(period === "noon" ? "Aqua" : "DarkBlue")
+		.setDescription(shift.participations.map((participation) => `\`\`${participation.login}\`\` **-** ${displayRoleMap[participation.role]}`).join("\n"))
+		.setFooter({ text: "Coordinateur Discord" });
 }
 
 const execute: DiscordCommandExecute = async (interaction) => {
@@ -31,12 +42,14 @@ const execute: DiscordCommandExecute = async (interaction) => {
 	const cashier = interaction.options.getString("caisse");
 	const wrap = interaction.options.getString("wrap");
 	const croq = interaction.options.getString("croq");
+	const preparation = interaction.options.getString("preparation");
 	const versatile = interaction.options.getString("polyvalent");
 
 	const participations: Array<Participation> = []
 	if (cashier) participations.push({ login: cashier, role: "cashier" });
 	if (wrap) participations.push({ login: wrap, role: "wrap" });
 	if (croq) participations.push({ login: croq, role: "croq" });
+	if (preparation) participations.push({ login: preparation, role: "preparation" });
 	if (versatile) participations.push({ login: versatile, role: "versatile" });
 
 	if (!participations.some(({ login }) => login === referent)) {
@@ -71,16 +84,7 @@ const execute: DiscordCommandExecute = async (interaction) => {
 }
 
 const presenceShiftCommand: DiscordCommand = {
-	data: new SlashCommandBuilder()
-		.setName("presence-shift")
-		.setDescription("Ajouter une nouvelle présence shift")
-		.addStringOption(opt => opt.setName("referent").setAutocomplete(true).setRequired(true).setDescription("Qui était référent du shift ?"))
-		.addStringOption(opt => opt.setName("date").setRequired(true).setDescription("Quel jour (aaaa-MM-dd"))
-		.addStringOption(opt => opt.setName("period").setRequired(true).addChoices({ name: "midi", value: "noon" }, { name: "soir", value: "evening" }).setDescription("midi ou soir"))
-		.addStringOption(opt => opt.setName("caisse").setAutocomplete(true).setDescription("Qui était à la caisse ?"))
-		.addStringOption(opt => opt.setName("wrap").setAutocomplete(true).setDescription("Qui a fait les wraps ?"))
-		.addStringOption(opt => opt.setName("croq").setAutocomplete(true).setDescription("Qui a fait les croqs ?"))
-		.addStringOption(opt => opt.setName("decoupe").setAutocomplete(true).setDescription("Qui était le commis de service ?")),
+	data: slashCommand,
 	filters: { admin: false },
 	execute,
 	async onAutoComplete(interaction) {

@@ -15,7 +15,8 @@ db.prepare(`--sql
 		referent_id INTEGER NOT NULL,
 		date TEXT NOT NULL,
 		period TEXT NOT NULL,
-		FOREIGN KEY(referent_id) REFERENCES members(id)
+		FOREIGN KEY(referent_id) REFERENCES members(id),
+		UNIQUE(date, period)
 	)
 `).run();
 
