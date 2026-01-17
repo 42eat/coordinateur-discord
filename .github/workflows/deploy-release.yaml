@@ -43,5 +43,5 @@ jobs:
           key: ${{ secrets.SSH_DEPLOY_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ${{ vars.TARGET_DIR }}
+            cd ${{ vars.SSH_TARGET_DIR }}
             pnpm install --frozen-lockfile --prod
