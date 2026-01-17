@@ -1,5 +1,5 @@
 import { Shift } from "../../db/actions/addShift";
-import { getMembers } from "../../db/actions/getMembers";
+import { getMembers } from "../../db/actions/members/getMembers";
 import { ResponseError } from "../../structures/ResponseError";
 import { hasDuplicate } from "../../utils/hasDuplicate";
 import isISO8601 from "../../utils/isISODate";

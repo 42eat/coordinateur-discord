@@ -1,7 +1,7 @@
 import { SqliteError } from "better-sqlite3";
 import { db } from "../database";
 import { addShiftParticipants, Presence } from "./addShiftParticipants";
-import { getMemberId } from "./getMembers";
+import { getMemberId } from "./members/getMembers";
 import { ResponseError } from "../../structures/ResponseError";
 
 export interface Shift {

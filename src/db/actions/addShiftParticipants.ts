@@ -1,5 +1,5 @@
 import { db } from "../database";
-import { getMemberId } from "./getMembers";
+import { getMemberId } from "./members/getMembers";
 
 export interface Presence {
 	login: string,
