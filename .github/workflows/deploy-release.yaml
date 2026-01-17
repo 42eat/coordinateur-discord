@@ -26,7 +26,7 @@ jobs:
 
       - uses: burnett01/rsync-deployments@v7.0.1
         with:
-          switches: -avz --delete --exclude='.env'
+          switches: -avz --delete --exclude='.env' --exclude='database.db'
           path: dist/
           remote_path: ${{ vars.SSH_TARGET_DIR }}
           remote_host: ${{ secrets.SSH_HOST }}
