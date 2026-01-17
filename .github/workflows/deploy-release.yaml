@@ -24,7 +24,7 @@ jobs:
 
       - run: pnpm run build
 
-      - uses: burnett01/rsync-deployments@v7.0.1
+      - uses: burnett01/rsync-deployments@v8
         with:
           switches: -avz --delete --exclude='.env' --exclude='database.db'
           path: dist/
