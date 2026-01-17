@@ -3,8 +3,8 @@ import { addShift, Shift } from "../../db/actions/addShift";
 import { Presence } from "../../db/actions/addShiftParticipants";
 import { DiscordCommand, DiscordCommandExecute } from "../../structures/DiscordCommand";
 import { createShiftEmbed } from "./createShiftEmbed";
-import { onAutoComplete } from "./onAutoComplete";
 import { assertValidShift } from "./assertValidShift";
+import { onMemberAutocomplete } from "../utils/autoComplete/members";
 
 const slashCommand = new SlashCommandBuilder()
 	.setName("presence-shift")
@@ -58,7 +58,7 @@ const presenceShiftCommand: DiscordCommand = {
 	data: slashCommand,
 	filters: { admin: false },
 	execute: execute,
-	onAutoComplete: onAutoComplete
+	onAutoComplete: onMemberAutocomplete
 };
 
 export default presenceShiftCommand;
