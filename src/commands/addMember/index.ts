@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "discord.js"
 import { DiscordCommand } from "../../structures/DiscordCommand";
 import { insertMember } from "../../db/actions/insertMember";
 
-const pingCommand: DiscordCommand = {
+const addMemberCommand: DiscordCommand = {
 	data: new SlashCommandBuilder()
 		.setName("add-member")
 		.setDescription("Add a member to the shift peoples")
@@ -20,4 +20,4 @@ const pingCommand: DiscordCommand = {
 	}
 }
 
-export default pingCommand;
+export default addMemberCommand;
