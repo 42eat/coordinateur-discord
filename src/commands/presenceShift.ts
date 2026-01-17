@@ -2,14 +2,17 @@ import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { DiscordCommand, DiscordCommandExecute } from "../structures/DiscordCommand";
 import { getMembers } from "../db/actions/getMembers";
 import { addShift, Shift } from "../db/actions/addShift";
-import { Participation } from "../db/actions/addShiftParticipants";
+import { Presence } from "../db/actions/addShiftParticipants";
 import { hasDuplicate } from "../utils/hasDuplicate";
+import { mdIntraProfile } from "../utils/stringFormat/mdIntraProfile";
+import isISO8601 from "../utils/isISODate";
+import { fullDateString } from "../utils/stringFormat/dateFormats";
 
 const slashCommand = new SlashCommandBuilder()
 	.setName("presence-shift")
 	.setDescription("Ajouter une nouvelle présence shift")
 	.addStringOption(opt => opt.setName("referent").setAutocomplete(true).setRequired(true).setDescription("Qui était référent du shift ?"))
-	.addStringOption(opt => opt.setName("date").setRequired(true).setDescription("Quel jour **(aaaa-MM-dd)**"))
+	.addStringOption(opt => opt.setName("date").setRequired(true).setDescription("Quel jour **au format ISO (aaaa-MM-dd)**"))
 	.addStringOption(opt => opt.setName("period").setRequired(true).addChoices({ name: "midi", value: "noon" }, { name: "soir", value: "evening" }).setDescription("midi ou soir ?"))
 	.addStringOption(opt => opt.setName("caisse").setAutocomplete(true).setDescription("Qui était à la caisse ?"))
 	.addStringOption(opt => opt.setName("wrap").setAutocomplete(true).setDescription("Qui a fait les wraps ?"))
@@ -21,20 +24,50 @@ const displayRoleMap: Record<string, string> = {
 	cashier: "caissier",
 	wrap: "wraps",
 	croq: "croque-monsieurs",
+	preparation: "découpe",
 	versatile: "polyvalent"
+};
+
+const displayPeriodMap: Record<string, string> = {
+	noon: "midi",
+	evening: "soir"
+};
+
+function formatPresences(shift: Shift) {
+	return shift.presences.map((presence) => `  - ${mdIntraProfile(presence.login)} **-** ${displayRoleMap[presence.role]}`).join("\n")
 }
 
 function createShiftEmbed(shift: Shift) {
 	const period = shift.date.period;
 	return new EmbedBuilder()
-		.setTitle(`__Shift du __\`\`${shift.date.day}\`\`__ ${period === "noon" ? "midi" : "soir"} host par \`\`${shift.referentLogin}\`\`__`)
-		.setColor(period === "noon" ? "Aqua" : "DarkBlue")
-		.setDescription(shift.participations.map((participation) => `\`\`${participation.login}\`\` **-** ${displayRoleMap[participation.role]}`).join("\n"))
+		.setTitle(`Présence shift`)
+		.setColor(period === "noon" ? "Gold" : "DarkBlue")
+		.setDescription(`${mdIntraProfile(shift.referentLogin)} a lancé un shift **${fullDateString(new Date(shift.date.day))}**
+- **Periode** : \`\`${displayPeriodMap[shift.date.period]}\`\`
+- **Presence** :
+			${formatPresences(shift)}`)
 		.setFooter({ text: "Coordinateur Discord" });
 }
 
-const execute: DiscordCommandExecute = async (interaction) => {
+function assertValidShift(shift: Shift) {
 	const members = getMembers();
+	const presences = shift.presences;
+
+	if (!presences.some(({ login }) => login === shift.referentLogin)) {
+		throw new Error("Referent must participate to the shift");
+	}
+	if (presences.some(({ login }) => !members.includes(login))) {
+		throw new Error("Some participants are not members of the **foyer**");
+	}
+	if (hasDuplicate(presences.map(({ login }) => login))) {
+		throw new Error("One member can't have 2 roles on the same shift");
+	}
+	if (!isISO8601(shift.date.day, { strict: true })) {
+		throw new Error("Invalid date, expected **ISO format (aaaa-MM-dd)**");
+	}
+}
+
+const execute: DiscordCommandExecute = async (interaction) => {
 
 	const referent = interaction.options.getString("referent", true);
 	const date = interaction.options.getString("date", true);
@@ -42,39 +75,26 @@ const execute: DiscordCommandExecute = async (interaction) => {
 	const cashier = interaction.options.getString("caisse");
 	const wrap = interaction.options.getString("wrap");
 	const croq = interaction.options.getString("croq");
-	const preparation = interaction.options.getString("preparation");
+	const preparation = interaction.options.getString("decoupe");
 	const versatile = interaction.options.getString("polyvalent");
 
-	const participations: Array<Participation> = []
-	if (cashier) participations.push({ login: cashier, role: "cashier" });
-	if (wrap) participations.push({ login: wrap, role: "wrap" });
-	if (croq) participations.push({ login: croq, role: "croq" });
-	if (preparation) participations.push({ login: preparation, role: "preparation" });
-	if (versatile) participations.push({ login: versatile, role: "versatile" });
-
-	if (!participations.some(({ login }) => login === referent)) {
-		interaction.reply({ content: "Referent must participate to the shift", flags: "Ephemeral" });
-		return;
-	}
-	if (participations.some(({ login }) => !members.includes(login))) {
-		interaction.reply({ content: "Some participants are not members of the **foyer**", flags: "Ephemeral" });
-		return;
-	}
-	if (hasDuplicate(participations.map(({ login }) => login))) {
-		interaction.reply({ content: "One member can't have 2 roles on the same shift", flags: "Ephemeral" });
-		return;
-	}
-
-	const shift: Shift = {
-		referentLogin: referent,
-		participations: participations,
-		date: {
-			day: date,
-			period: period
-		}
-	}
+	const presences: Array<Presence> = []
+	if (cashier) presences.push({ login: cashier, role: "cashier" });
+	if (wrap) presences.push({ login: wrap, role: "wrap" });
+	if (croq) presences.push({ login: croq, role: "croq" });
+	if (preparation) presences.push({ login: preparation, role: "preparation" });
+	if (versatile) presences.push({ login: versatile, role: "versatile" });
 
 	try {
+		const shift: Shift = {
+			referentLogin: referent,
+			presences: presences,
+			date: {
+				day: date,
+				period: period
+			}
+		}
+		assertValidShift(shift)
 		addShift(shift);
 		interaction.reply({ embeds: [createShiftEmbed(shift)] });
 	} catch (error) {
@@ -89,7 +109,7 @@ const presenceShiftCommand: DiscordCommand = {
 	execute,
 	async onAutoComplete(interaction) {
 		const focused = interaction.options.getFocused();
-		const choices = getMembers();
+		const choices = getMembers().sort();
 		const filtered = choices.filter((choice) => choice.startsWith(focused));
 
 		filtered.concat(choices.filter((choice) => !choice.startsWith(focused) && choice.includes(focused)));

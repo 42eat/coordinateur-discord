@@ -1,19 +1,18 @@
 import { db } from "../database";
 import { getMemberId } from "./getMembers";
 
-export interface Participation {
+export interface Presence {
 	login: string,
 	role: string
 };
 
-const insertParticipationStmt = db.prepare<{ memberId: number, shiftId: number | bigint, role: string }>(`--sql
-	INSERT INTO participations (member_id, shift_id, role) VALUES (@memberId, @shiftId, @role)
-     ON CONFLICT(member_id, shift_id) DO UPDATE SET role = excluded.role
+const insertPresenceStmt = db.prepare<{ memberId: number, shiftId: number | bigint, role: string }>(`--sql
+	INSERT INTO presences (member_id, shift_id, role) VALUES (@memberId, @shiftId, @role)
 `);
 
-export const addShiftParticipants = db.transaction((shiftId: number | bigint, participations: Participation[]) => {
-	participations.forEach((participation) => {
-		const participantId = getMemberId(participation.login);
-		insertParticipationStmt.run({ memberId: participantId, shiftId, role: participation.role });
+export const addShiftParticipants = db.transaction((shiftId: number | bigint, presences: Presence[]) => {
+	presences.forEach((presence) => {
+		const participantId = getMemberId(presence.login);
+		insertPresenceStmt.run({ memberId: participantId, shiftId, role: presence.role });
 	});
 })

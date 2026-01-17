@@ -1,11 +1,12 @@
+import { SqliteError } from "better-sqlite3";
 import { db } from "../database";
-import { addShiftParticipants, Participation } from "./addShiftParticipants";
+import { addShiftParticipants, Presence } from "./addShiftParticipants";
 import { getMemberId } from "./getMembers";
 
 export interface Shift {
 	referentLogin: string,
 	date: ShiftDate,
-	participations: Array<Participation>
+	presences: Array<Presence>
 }
 
 export interface ShiftDate {
@@ -18,11 +19,17 @@ const insertShiftStmt = db.prepare<{ referentId: number, date: string, period: s
 `);
 
 export const insertShift = db.transaction((referentId: number, date: ShiftDate) => {
-	return insertShiftStmt.run({ referentId, date: date.day, period: date.period })
+	try {
+		return insertShiftStmt.run({ referentId, date: date.day, period: date.period })
+	} catch (error) {
+		if (!(error instanceof SqliteError)) throw error;
+		if (error.code !== "SQLITE_CONSTRAINT_UNIQUE") throw error;
+		throw new Error("There is already a shift registered at this date and period combination");
+	}
 });
 
 export const addShift = db.transaction((shift: Shift) => {
 	const referentId = getMemberId(shift.referentLogin);
 	const shiftId = insertShift(referentId, shift.date).lastInsertRowid;
-	addShiftParticipants(shiftId, shift.participations);
+	addShiftParticipants(shiftId, shift.presences);
 })

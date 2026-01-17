@@ -1,3 +1,4 @@
+import { SqliteError } from "better-sqlite3";
 import { db } from "../database";
 
 const insertMemberStmt = db.prepare<{ login: string }>(`--sql
@@ -5,5 +6,11 @@ const insertMemberStmt = db.prepare<{ login: string }>(`--sql
 `);
 
 export function insertMember(login: string) {
-	insertMemberStmt.run({ login });
+	try {
+		return insertMemberStmt.run({ login });
+	} catch (error) {
+		if (!(error instanceof SqliteError)) throw error;
+		if (error.code !== "SQLITE_CONSTRAINT_UNIQUE") throw error;
+		throw new Error("This member is already registered");
+	}
 }

@@ -21,7 +21,7 @@ db.prepare(`--sql
 `).run();
 
 db.prepare(`--sql
-	CREATE TABLE IF NOT EXISTS participations (
+	CREATE TABLE IF NOT EXISTS presences (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		member_id INTEGER NOT NULL,
 		shift_id INTEGER NOT NULL,

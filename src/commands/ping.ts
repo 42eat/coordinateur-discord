@@ -5,7 +5,7 @@ const pingCommand: DiscordCommand = {
 	data: new SlashCommandBuilder()
 		.setName("ping")
 		.setDescription("🏓"),
-	filters: { admin: false },
+	filters: { admin: true },
 	async execute(interaction) {
 		interaction.reply("Pong !");
 	}
