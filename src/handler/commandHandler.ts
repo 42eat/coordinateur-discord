@@ -4,6 +4,8 @@ import { DiscordCommand } from "../structures/DiscordCommand";
 import { BOLD, GREEN, RESET } from "../logHelper/ansiColors";
 import fs from "fs";
 
+const indexFormatRgx = /^index\.(js|ts|mjs|cjs)$/
+
 export function loadCommands(client: Client, dir: string) {
 	const entries = fs.readdirSync(dir);
 
@@ -13,7 +15,7 @@ export function loadCommands(client: Client, dir: string) {
 
 		if (stats.isDirectory()) {
 			loadCommands(client, file);
-		} else {
+		} else if (indexFormatRgx.test(fileName)) {
 			const command: DiscordCommand = require(file).default;
 			console.log(`[${BOLD}${GREEN}CMD${RESET}] loading:`, command.data.name);
 			client.commands.set(command.data.name, command);

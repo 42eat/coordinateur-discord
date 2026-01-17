@@ -1,12 +1,10 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { DiscordCommand, DiscordCommandExecute } from "../structures/DiscordCommand";
-import { getMembers } from "../db/actions/getMembers";
-import { addShift, Shift } from "../db/actions/addShift";
-import { Presence } from "../db/actions/addShiftParticipants";
-import { hasDuplicate } from "../utils/hasDuplicate";
-import { mdIntraProfile } from "../utils/stringFormat/mdIntraProfile";
-import isISO8601 from "../utils/isISODate";
-import { fullDateString } from "../utils/stringFormat/dateFormats";
+import { SlashCommandBuilder } from "discord.js";
+import { addShift, Shift } from "../../db/actions/addShift";
+import { Presence } from "../../db/actions/addShiftParticipants";
+import { DiscordCommand, DiscordCommandExecute } from "../../structures/DiscordCommand";
+import { createShiftEmbed } from "./createShiftEmbed";
+import { onAutoComplete } from "./onAutoComplete";
+import { assertValidShift } from "./assertValidShift";
 
 const slashCommand = new SlashCommandBuilder()
 	.setName("presence-shift")
@@ -19,53 +17,6 @@ const slashCommand = new SlashCommandBuilder()
 	.addStringOption(opt => opt.setName("croq").setAutocomplete(true).setDescription("Qui a fait les croqs ?"))
 	.addStringOption(opt => opt.setName("decoupe").setAutocomplete(true).setDescription("Qui était le commis de service ?"))
 	.addStringOption(opt => opt.setName("polyvalent").setAutocomplete(true).setDescription("Qui était le branle-couille ?"))
-
-const displayRoleMap: Record<string, string> = {
-	cashier: "caissier",
-	wrap: "wraps",
-	croq: "croque-monsieurs",
-	preparation: "découpe",
-	versatile: "polyvalent"
-};
-
-const displayPeriodMap: Record<string, string> = {
-	noon: "midi",
-	evening: "soir"
-};
-
-function formatPresences(shift: Shift) {
-	return shift.presences.map((presence) => `  - ${mdIntraProfile(presence.login)} **-** ${displayRoleMap[presence.role]}`).join("\n")
-}
-
-function createShiftEmbed(shift: Shift) {
-	const period = shift.date.period;
-	return new EmbedBuilder()
-		.setTitle(`Présence shift`)
-		.setColor(period === "noon" ? "Gold" : "DarkBlue")
-		.setDescription(`${mdIntraProfile(shift.referentLogin)} a lancé un shift **${fullDateString(new Date(shift.date.day))}**
-- **Periode** : \`\`${displayPeriodMap[shift.date.period]}\`\`
-- **Presence** :
-			${formatPresences(shift)}`)
-		.setFooter({ text: "Coordinateur Discord" });
-}
-
-function assertValidShift(shift: Shift) {
-	const members = getMembers();
-	const presences = shift.presences;
-
-	if (!presences.some(({ login }) => login === shift.referentLogin)) {
-		throw new Error("Referent must participate to the shift");
-	}
-	if (presences.some(({ login }) => !members.includes(login))) {
-		throw new Error("Some participants are not members of the **foyer**");
-	}
-	if (hasDuplicate(presences.map(({ login }) => login))) {
-		throw new Error("One member can't have 2 roles on the same shift");
-	}
-	if (!isISO8601(shift.date.day, { strict: true })) {
-		throw new Error("Invalid date, expected **ISO format (aaaa-MM-dd)**");
-	}
-}
 
 const execute: DiscordCommandExecute = async (interaction) => {
 
@@ -106,18 +57,8 @@ const execute: DiscordCommandExecute = async (interaction) => {
 const presenceShiftCommand: DiscordCommand = {
 	data: slashCommand,
 	filters: { admin: false },
-	execute,
-	async onAutoComplete(interaction) {
-		const focused = interaction.options.getFocused();
-		const choices = getMembers().sort();
-		const filtered = choices.filter((choice) => choice.startsWith(focused));
-
-		filtered.concat(choices.filter((choice) => !choice.startsWith(focused) && choice.includes(focused)));
-
-		await interaction.respond(
-			filtered.map(choice => ({ name: choice, value: choice }))
-		);
-	}
+	execute: execute,
+	onAutoComplete: onAutoComplete
 };
 
 export default presenceShiftCommand;
