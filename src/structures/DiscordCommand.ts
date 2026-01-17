@@ -6,5 +6,5 @@ export interface DiscordCommand {
 	data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder,
 	filters: { admin: boolean }
 	execute: DiscordCommandExecute
-	onAutoComplete?: (Interaction: AutocompleteInteraction) => Promise<void>
+	onAutoComplete?: (interaction: AutocompleteInteraction) => Promise<void>
 }
