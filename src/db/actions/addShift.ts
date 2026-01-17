@@ -2,6 +2,7 @@ import { SqliteError } from "better-sqlite3";
 import { db } from "../database";
 import { addShiftParticipants, Presence } from "./addShiftParticipants";
 import { getMemberId } from "./getMembers";
+import { ResponseError } from "../../structures/ResponseError";
 
 export interface Shift {
 	referentLogin: string,
@@ -24,7 +25,7 @@ export const insertShift = db.transaction((referentId: number, date: ShiftDate) 
 	} catch (error) {
 		if (!(error instanceof SqliteError)) throw error;
 		if (error.code !== "SQLITE_CONSTRAINT_UNIQUE") throw error;
-		throw new Error("There is already a shift registered at this date and period combination");
+		throw new ResponseError("There is already a shift registered at this date and period combination");
 	}
 });
 

@@ -5,6 +5,7 @@ import { DiscordCommand, DiscordCommandExecute } from "../../structures/DiscordC
 import { createShiftEmbed } from "./createShiftEmbed";
 import { assertValidShift } from "./assertValidShift";
 import { onMemberAutocomplete } from "../utils/autoComplete/members";
+import { ResponseError } from "../../structures/ResponseError";
 
 const slashCommand = new SlashCommandBuilder()
 	.setName("presence-shift")
@@ -49,7 +50,7 @@ const execute: DiscordCommandExecute = async (interaction) => {
 		addShift(shift);
 		interaction.reply({ embeds: [createShiftEmbed(shift)] });
 	} catch (error) {
-		if (!(error instanceof Error)) throw error;
+		if (!(error instanceof ResponseError)) throw error;
 		interaction.reply({ content: error.message, flags: "Ephemeral" });
 	}
 }

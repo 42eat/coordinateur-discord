@@ -1,3 +1,4 @@
+import { ResponseError } from "../../structures/ResponseError";
 import { db } from "../database";
 
 const getMembersStmt = db.prepare<[], { login: string }>(`--sql
@@ -15,7 +16,7 @@ const getMemberIdStmt = db.prepare<{ login: string }, { id: number }>(`--sql
 export const getMemberId = db.transaction((login: string) => {
 	const memberRow = getMemberIdStmt.get({ login })
 	if (!memberRow) {
-		throw new Error(`Can't find member : ${login}`);
+		throw new ResponseError(`Can't find member : ${login}`);
 	}
 	return memberRow.id;
 });

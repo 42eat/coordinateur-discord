@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "discord.js"
 import { DiscordCommand } from "../../structures/DiscordCommand";
 import { insertMember } from "../../db/actions/insertMember";
+import { ResponseError } from "../../structures/ResponseError";
 
 const addMemberCommand: DiscordCommand = {
 	data: new SlashCommandBuilder()
@@ -14,7 +15,7 @@ const addMemberCommand: DiscordCommand = {
 			insertMember(login);
 			interaction.reply({ content: `Member \`\`${login}\`\` was successfully added.`, flags: "Ephemeral" });
 		} catch (error) {
-			if (!(error instanceof Error)) throw error;
+			if (!(error instanceof ResponseError)) throw error;
 			interaction.reply({ content: error.message, flags: "Ephemeral" });
 		}
 	}
