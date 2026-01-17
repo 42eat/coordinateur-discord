@@ -5,7 +5,7 @@ export default {
 	once: true,
 	async execute(guild) {
 		const client = guild.client;
-		console.log(`Joined server as ${client.user.tag}`);
-		client.application.commands.set(client.commands.map((command) => command.data));
+		console.log(`Joined guild as ${client.user.tag}`);
+		guild.commands.set(client.commands.map((command) => command.data));
 	}
 } satisfies DiscordEvent<"guildCreate">;
