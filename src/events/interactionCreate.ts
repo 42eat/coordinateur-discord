@@ -5,7 +5,11 @@ import { ResponseError } from "../structures/ResponseError";
 async function onInteractionError(interaction: Interaction, error: Error) {
 	if (interaction.isRepliable() && !interaction.replied) {
 		if (error instanceof ResponseError) {
-			await interaction.reply({ content: error.message, flags: "Ephemeral" });
+			if (interaction.deferred) {
+				await interaction.editReply({ content: error.message });
+			} else {
+				await interaction.reply({ content: error.message, flags: "Ephemeral" });
+			}
 			return;
 		}
 		await interaction.reply({ content: "An error occured :(", flags: "Ephemeral" });
