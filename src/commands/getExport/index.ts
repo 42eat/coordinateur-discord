@@ -42,7 +42,7 @@ const pingCommand: DiscordCommand = {
 		.setName("export-shifts")
 		.setDescription("Export des fichiers csv à importer dans la fiche d'activité de 42 Lyon")
 		.addStringOption(opt => opt.setName("since").setAutocomplete(true).setDescription("Date (aaaa-MM-dd) à partir desquels le shifs seront exportés")),
-	filters: { admin: true },
+	filters: { admin: false },
 	execute: execute,
 	onAutoComplete: onShiftDateAutocomplete
 }
