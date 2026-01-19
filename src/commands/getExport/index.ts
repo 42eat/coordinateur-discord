@@ -41,7 +41,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
 const pingCommand: DiscordCommand = {
 	data: new SlashCommandBuilder()
 		.setName("export-shifts")
-		.setDescription("Export des fichiers csv à importer dans la fiche d'activité de 42 Lyon")
+		.setDescription("Exporte des fichiers csv à importer dans la fiche d'activité de 42 Lyon")
 		.addStringOption(opt => opt.setName("depuis").setAutocomplete(true).setDescription("Date (aaaa-MM-dd) à partir desquels le shifs seront exportés")),
 	filters: { admin: false },
 	execute: execute,
