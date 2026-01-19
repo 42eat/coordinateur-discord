@@ -5,8 +5,8 @@ import { insertMember } from "../../db/actions/members/insertMember";
 const addMemberCommand: DiscordCommand = {
 	data: new SlashCommandBuilder()
 		.setName("add-member")
-		.setDescription("Add a member to the shift peoples")
-		.addStringOption((opt) => opt.setName("login").setDescription("New member's login")),
+		.setDescription("Ajoute un member au foyer")
+		.addStringOption((opt) => opt.setName("login").setDescription("Login du membre")),
 	filters: { admin: true },
 	async execute(interaction) {
 		const login = interaction.options.getString("login", true)

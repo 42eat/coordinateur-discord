@@ -9,7 +9,7 @@ import { ResponseError } from "../../structures/ResponseError";
 
 const slashCommand = new SlashCommandBuilder()
 	.setName("presence-shift")
-	.setDescription("Ajouter une nouvelle présence shift")
+	.setDescription("Ajoute une nouvelle présence shift")
 	.addStringOption(opt => opt.setName("referent").setAutocomplete(true).setRequired(true).setDescription("Qui était référent du shift ?"))
 	.addStringOption(opt => opt.setName("date").setRequired(true).setDescription("Quel jour au format ISO (aaaa-MM-dd)"))
 	.addStringOption(opt => opt.setName("period").setRequired(true).addChoices({ name: "midi", value: "noon" }, { name: "soir", value: "evening" }).setDescription("midi ou soir ?"))

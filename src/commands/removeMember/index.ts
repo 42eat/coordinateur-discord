@@ -6,7 +6,7 @@ import { onMemberAutocomplete } from "../utils/autoComplete/members";
 const removeMemberCommand: DiscordCommand = {
 	data: new SlashCommandBuilder()
 		.setName("remove-member")
-		.setDescription("Remove a member from the shift peoples")
+		.setDescription("Supprime un membre du foyer")
 		.addStringOption((opt) => opt.setName("login").setRequired(true).setAutocomplete(true).setDescription("Member to remove")),
 	filters: { admin: true },
 	async execute(interaction) {

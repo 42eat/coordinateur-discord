@@ -4,7 +4,7 @@ import { DiscordCommand } from "../../structures/DiscordCommand";
 const reloadCommand: DiscordCommand = {
 	data: new SlashCommandBuilder()
 		.setName("reload")
-		.setDescription("Reload every commands of the client"),
+		.setDescription("Recharge toutes les commandes du client"),
 	filters: { admin: true },
 	async execute(interaction) {
 		const deferPromise = interaction.deferReply();
