@@ -1,6 +1,7 @@
+import { PresenceRole } from "../../structures/db/PresencesTable";
 import { db } from "../database";
 
-const getRoleCountStmt = db.prepare<{ login: string, role: string }, { count: number }>(`--sql
+const getRoleCountStmt = db.prepare<{ login: string, role: PresenceRole }, { count: number }>(`--sql
     SELECT COUNT(*) AS count
     FROM presences p
     JOIN members m ON m.id = p.member_id
@@ -8,7 +9,7 @@ const getRoleCountStmt = db.prepare<{ login: string, role: string }, { count: nu
       AND p.role = @role
 `);
 
-export const getRoleCount = db.transaction((login: string, role: string) => {
+export const getRoleCount = db.transaction((login: string, role: PresenceRole) => {
 	return getRoleCountStmt.get({ login, role })!.count;
 });
 

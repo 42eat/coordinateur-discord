@@ -1,4 +1,4 @@
-import { Shift } from "../../db/actions/addShift";
+import { Shift } from "../../structures/db/ShiftTable";
 import { getMembers } from "../../db/actions/members/getMembers";
 import { ResponseError } from "../../structures/ResponseError";
 import { hasDuplicate } from "../../utils/hasDuplicate";

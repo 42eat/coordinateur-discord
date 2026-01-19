@@ -1,6 +1,7 @@
+import { ShiftPeriod } from "../../structures/db/ShiftTable";
 import { db } from "../database";
 
-const getLastExportablePresencesStmt = db.prepare<[], { login: string, date: string, period: string }>(`--sql
+const getLastExportablePresencesStmt = db.prepare<[], { login: string, date: string, period: ShiftPeriod }>(`--sql
 	SELECT login, date, period
 	FROM presences p
 	JOIN members m ON m.id = p.member_id
@@ -20,7 +21,7 @@ export const getLastExportablePresences = db.transaction(() => {
 	return result
 });
 
-const getExportablePresencesSinceStmt = db.prepare<{ targetDate: string }, { login: string, date: string, period: string }>(`--sql
+const getExportablePresencesSinceStmt = db.prepare<{ targetDate: string }, { login: string, date: string, period: ShiftPeriod }>(`--sql
 	SELECT login, date, period
 	FROM presences p
 	JOIN members m ON m.id = p.member_id

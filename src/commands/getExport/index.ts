@@ -3,11 +3,12 @@ import { DiscordCommand } from "../../structures/DiscordCommand";
 import { getExportablePresencesSince, getLastExportablePresences } from "../../db/actions/getExportable";
 import { ResponseError } from "../../structures/ResponseError";
 import { onShiftDateAutocomplete } from "../utils/autoComplete/shiftDate";
+import { ShiftPeriod } from "../../structures/db/ShiftTable";
 
 async function execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 		const date = interaction.options.getString("since");
-		let exportedPresences: Array<{ login: string, date: string, period: string }>;
+		let exportedPresences: Array<{ login: string, date: string, period: ShiftPeriod }>;
 		if (date) {
 			exportedPresences = getExportablePresencesSince(date);
 		} else {

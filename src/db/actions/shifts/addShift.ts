@@ -1,21 +1,11 @@
 import { SqliteError } from "better-sqlite3";
-import { db } from "../database";
-import { addShiftParticipants, Presence } from "./addShiftParticipants";
-import { getMemberId } from "./members/getMembers";
-import { ResponseError } from "../../structures/ResponseError";
+import { db } from "../../database";
+import { addShiftParticipants } from "./addShiftParticipants";
+import { getMemberId } from "../members/getMembers";
+import { ResponseError } from "../../../structures/ResponseError";
+import { Shift, ShiftDate, ShiftPeriod } from "../../../structures/db/ShiftTable";
 
-export interface Shift {
-	referentLogin: string,
-	date: ShiftDate,
-	presences: Array<Presence>
-}
-
-export interface ShiftDate {
-	day: string,
-	period: string
-}
-
-const insertShiftStmt = db.prepare<{ referentId: number, date: string, period: string }, { id: number }>(`--sql
+const insertShiftStmt = db.prepare<{ referentId: number, date: string, period: ShiftPeriod }, { id: number }>(`--sql
 	INSERT INTO shifts (referent_id, date, period) VALUES (@referentId, @date, @period)
 `);
 

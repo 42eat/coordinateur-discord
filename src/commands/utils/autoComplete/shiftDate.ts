@@ -1,5 +1,5 @@
 import { AutocompleteInteraction } from "discord.js";
-import { getShiftDates } from "../../../db/actions/getShiftDates";
+import { getShiftDates } from "../../../db/actions/shifts/getShiftDates";
 
 export async function onShiftDateAutocomplete(interaction: AutocompleteInteraction) {
 	const focused = interaction.options.getFocused();

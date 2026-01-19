@@ -1,11 +1,12 @@
 import { SlashCommandBuilder } from "discord.js";
-import { addShift, Shift } from "../../db/actions/addShift";
-import { Presence } from "../../db/actions/addShiftParticipants";
+import { addShift } from "../../db/actions/shifts/addShift";
+import { ShiftPresence } from "../../structures/db/PresencesTable";
 import { DiscordCommand, DiscordCommandExecute } from "../../structures/DiscordCommand";
 import { createShiftEmbed } from "./createShiftEmbed";
 import { assertValidShift } from "./assertValidShift";
 import { onMemberAutocomplete } from "../utils/autoComplete/members";
 import { ResponseError } from "../../structures/ResponseError";
+import { Shift } from "../../structures/db/ShiftTable";
 
 const slashCommand = new SlashCommandBuilder()
 	.setName("presence-shift")
@@ -30,7 +31,7 @@ const execute: DiscordCommandExecute = async (interaction) => {
 	const preparation = interaction.options.getString("decoupe");
 	const versatile = interaction.options.getString("polyvalent");
 
-	const presences: Array<Presence> = []
+	const presences: Array<ShiftPresence> = []
 	if (cashier) presences.push({ login: cashier, role: "cashier" });
 	if (wrap) presences.push({ login: wrap, role: "wrap" });
 	if (croq) presences.push({ login: croq, role: "croq" });
