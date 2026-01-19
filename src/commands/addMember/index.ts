@@ -7,7 +7,7 @@ const addMemberCommand: DiscordCommand = {
 		.setName("add-member")
 		.setDescription("Ajoute un member au foyer")
 		.addStringOption((opt) => opt.setName("login").setDescription("Login du membre")),
-	filters: { admin: true },
+	filters: { admin: false },
 	async execute(interaction) {
 		const login = interaction.options.getString("login", true)
 		insertMember(login);
