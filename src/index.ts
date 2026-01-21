@@ -1,11 +1,11 @@
 import { config } from "dotenv";
-import { Client, Collection, GatewayIntentBits } from "discord.js";
-import { DiscordCommand } from "./structures/DiscordCommand";
+import { GatewayIntentBits } from "discord.js";
 import { registerEvents } from "./handler/eventHandler";
 import path from "path";
 import { loadCommands } from "./handler/commandHandler";
 
 import "./db/database"; // Creates and preloads the database
+import { ExtendedClient } from "./structures/BotClient";
 
 config({ quiet: true })
 
@@ -17,9 +17,7 @@ process.on("uncaughtException", (err, origin) => {
 process.on("warning", (warn) => { console.warn("[WARNING]", warn.message) });
 
 async function main() {
-	const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
-	client.commands = new Collection<string, DiscordCommand>();
+	const client = new ExtendedClient({ intents: [GatewayIntentBits.Guilds] });
 
 	loadCommands(client, path.join(__dirname, "./commands"));
 	registerEvents(client, path.join(__dirname, "./events"));
