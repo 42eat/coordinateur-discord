@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { addShift } from "../../db/actions/shifts/addShift";
 import { ShiftPresence } from "../../structures/db/PresencesTable";
 import { DiscordCommand, DiscordCommandExecute } from "../../structures/DiscordCommand";
-import { createShiftEmbed } from "./createShiftEmbed";
+import { createShiftEmbed } from "../utils/embeds/shift";
 import { assertValidShift } from "./assertValidShift";
 import { onMemberAutocomplete } from "../utils/autoComplete/members";
 import { ResponseError } from "../../structures/ResponseError";
