@@ -1,8 +1,8 @@
+import { ShiftTableRow } from "../../../structures/db/ShiftTable";
 import { db } from "../../database";
-import { ShiftTableRow } from "../../../structures/db/ShiftTable"
 
 const getShiftDatesStmt = db.prepare<[], Pick<ShiftTableRow, "date">>(`--sql
-	SELECT date FROM shifts;
+	SELECT DISTINCT date FROM shifts;
 `);
 
 export const getShiftDates = db.transaction(() => {

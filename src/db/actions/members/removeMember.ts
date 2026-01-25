@@ -17,8 +17,7 @@ export function deleteMember(login: string) {
         return info;
     } catch (error) {
 		if (!(error instanceof SqliteError)) throw error;
-		console.log(error)
-        throw new Error("Error while deleting member");
+        throw new Error("Error while deleting member", { cause: error });
     }
 }
 
@@ -29,6 +28,6 @@ export function deleteMemberById(id: number) {
         return info;
     } catch (error) {
         if (!(error instanceof SqliteError)) throw error;
-        throw new Error("Error while deleting member");
+        throw new Error("Error while deleting member", { cause: error });
     }
 }
