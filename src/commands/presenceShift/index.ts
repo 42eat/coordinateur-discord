@@ -47,9 +47,11 @@ const execute: DiscordCommandExecute = async (interaction) => {
 				period: period
 			}
 		}
-		assertValidShift(shift)
-		addShift(shift);
-		interaction.reply({ embeds: [createShiftEmbed(shift)] });
+		assertValidShift(shift);
+		const message = await interaction.reply({ embeds: [createShiftEmbed(shift)], withResponse: true });
+		const messageId = message.resource?.message?.id;
+		if (!messageId) throw new Error("Message not send");
+		addShift(shift, messageId);
 	} catch (error) {
 		if (!(error instanceof ResponseError)) throw error;
 		interaction.reply({ content: error.message, flags: "Ephemeral" });

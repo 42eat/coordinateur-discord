@@ -29,11 +29,18 @@ export default {
 				return await command.execute(interaction)
 			} else if (interaction.isAutocomplete()) {
 				const command = client.commands.get(interaction.commandName);
-				if (!command) throw new Error("Command interaction not in collection");
+				if (!command) throw new Error("Autocomplete interaction not in collection");
 				if (!command.onAutoComplete) throw new Error("No autocomplete could be loaded");
 				await command.onAutoComplete(interaction);
-			} else if (interaction.isRepliable()) {
-				await interaction.reply({ content: "Cannot find interaction :(", flags: "Ephemeral" });
+			} else if (interaction.isButton()) {
+				const args = interaction.customId.split(":");
+				const buttonName = args.shift();
+				if (!buttonName) throw new Error("Bad button customId");
+				const button = client.buttons.get(buttonName);
+				if (!button) throw new Error("Button was not found");
+				button.execute(interaction, ...args);
+			} else {
+				throw new ResponseError("Cannot find interaction :(");
 			}
 		} catch (error) {
 			if (!(error instanceof Error)) throw error;

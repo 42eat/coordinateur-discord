@@ -2,8 +2,8 @@ import { db } from "../../database";
 import { Shift, ShiftPeriod } from "../../../structures/db/ShiftTable"
 import { getPresenceByShiftId } from "../presences/getPresence";
 
-const getShiftByIdStmt = db.prepare<{ id: number }, { referentLogin: string, date: string, period: ShiftPeriod }>(`--sql
-	SELECT login AS referentLogin, date, period
+const getShiftByIdStmt = db.prepare<{ id: number }, { referentLogin: string, date: string, period: ShiftPeriod, discordMessageId: string }>(`--sql
+	SELECT login AS referentLogin, date, period, discord_message_id
 	FROM shifts s
 	JOIN members m ON s.referent_id = m.id
 	WHERE s.id = @id;
@@ -14,7 +14,9 @@ export const getShiftById = db.transaction((id: number) => {
 	if (!shift) throw new Error("Shift id not found");
 
 	const presences = getPresenceByShiftId(id);
-	const result: Shift = {
+	const result: Shift & { id: number, discordMessageId: string } = {
+		id,
+		discordMessageId: shift.discordMessageId,
 		referentLogin: shift.referentLogin,
 		date: {
 			day: shift.date,
@@ -25,8 +27,8 @@ export const getShiftById = db.transaction((id: number) => {
 	return result;
 });
 
-const getShiftsByDateStmt = db.prepare<{ date: string }, { id: number, referentLogin: string, date: string, period: ShiftPeriod }>(`--sql
-	SELECT s.id, login AS referentLogin, date, period
+const getShiftsByDateStmt = db.prepare<{ date: string }, { id: number, referentLogin: string, date: string, period: ShiftPeriod, discordMessageId: string }>(`--sql
+	SELECT s.id, login AS referentLogin, date, period, discord_message_id as discordMessageId
 	FROM shifts s
 	JOIN members m ON s.referent_id = m.id
 	WHERE date = @date;
@@ -38,7 +40,9 @@ export const getShiftsByDate = db.transaction((date: string) => {
 
 	return shift.map((shift) => {
 		const presences = getPresenceByShiftId(shift.id);
-		const result: Shift = {
+		const result: Shift & { id: number, discordMessageId: string } = {
+			id: shift.id,
+			discordMessageId: shift.discordMessageId,
 			referentLogin: shift.referentLogin,
 			date: {
 				day: shift.date,

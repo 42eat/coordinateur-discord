@@ -5,7 +5,7 @@ import path from "path";
 import { loadCommands } from "./handler/commandHandler";
 
 import "./db/database"; // Creates and preloads the database
-import { ExtendedClient } from "./structures/BotClient";
+import { ExtendedClient } from "./structures/ExtendedClient";
 
 config({ quiet: true })
 

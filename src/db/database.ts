@@ -15,6 +15,7 @@ db.prepare(`--sql
 	CREATE TABLE IF NOT EXISTS shifts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		referent_id INTEGER NOT NULL,
+		discord_message_id TEXT NOT NULL,
 		date TEXT NOT NULL,
 		period TEXT NOT NULL,
 		exported INTEGER NOT NULL DEFAULT 0,
