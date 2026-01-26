@@ -7,6 +7,8 @@ import { displayPeriodMap } from "../utils/embeds/displayMaps";
 import { removePresenceButton } from "../../buttons/removePresence";
 import { deleteMessageButton } from "../../buttons/deleteMessage";
 
+const periodOrder = ["noon", "evening"];
+
 const reloadCommand: DiscordCommand = {
 	data: new SlashCommandBuilder()
 		.setName("remove-presence")
@@ -16,7 +18,7 @@ const reloadCommand: DiscordCommand = {
 	async execute(interaction) {
 		const date = interaction.options.getString("date", true);
 
-		const shifts = getShiftsByDate(date);
+		const shifts = getShiftsByDate(date).sort((shiftA, shiftB) => periodOrder.indexOf(shiftA.date.period) - periodOrder.indexOf(shiftB.date.period));
 
 		const buttons: Array<ButtonBuilder> = [];
 
