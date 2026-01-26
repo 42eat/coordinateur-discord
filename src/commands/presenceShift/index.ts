@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js";
-import { addShift } from "../../db/actions/shifts/addShift";
+import { addShift, setShiftMessageId } from "../../db/actions/shifts/addShift";
 import { ShiftPresence } from "../../structures/db/PresencesTable";
 import { DiscordCommand, DiscordCommandExecute } from "../../structures/DiscordCommand";
 import { createShiftEmbed } from "../utils/embeds/shift";
@@ -48,10 +48,11 @@ const execute: DiscordCommandExecute = async (interaction) => {
 			}
 		}
 		assertValidShift(shift);
+		const shiftId = addShift(shift);
 		const message = await interaction.reply({ embeds: [createShiftEmbed(shift)], withResponse: true });
 		const messageId = message.resource?.message?.id;
-		if (!messageId) throw new Error("Message not send");
-		addShift(shift, messageId);
+		if (!messageId) throw new ResponseError("Embed couldn't be send but shift was registered.");
+		setShiftMessageId(shiftId, messageId);
 	} catch (error) {
 		if (!(error instanceof ResponseError)) throw error;
 		interaction.reply({ content: error.message, flags: "Ephemeral" });

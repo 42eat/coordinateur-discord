@@ -5,13 +5,13 @@ import { getMemberId } from "../members/getMembers";
 import { ResponseError } from "../../../structures/ResponseError";
 import { Shift, ShiftDate, ShiftPeriod } from "../../../structures/db/ShiftTable";
 
-const insertShiftStmt = db.prepare<{ referentId: number, date: string, period: ShiftPeriod, discordMessageId: string }, { id: number }>(`--sql
-	INSERT INTO shifts (referent_id, date, period, discord_message_id) VALUES (@referentId, @date, @period, @discordMessageId)
+const insertShiftStmt = db.prepare<{ referentId: number, date: string, period: ShiftPeriod }, { id: number }>(`--sql
+	INSERT INTO shifts (referent_id, date, period) VALUES (@referentId, @date, @period)
 `);
 
-export const insertShift = db.transaction((referentId: number, date: ShiftDate, discordMessageId: string) => {
+export const insertShift = db.transaction((referentId: number, date: ShiftDate) => {
 	try {
-		return insertShiftStmt.run({ referentId, date: date.day, period: date.period, discordMessageId })
+		return insertShiftStmt.run({ referentId, date: date.day, period: date.period })
 	} catch (error) {
 		if (!(error instanceof SqliteError)) throw error;
 		if (error.code !== "SQLITE_CONSTRAINT_UNIQUE") throw error;
@@ -19,8 +19,17 @@ export const insertShift = db.transaction((referentId: number, date: ShiftDate, 
 	}
 });
 
-export const addShift = db.transaction((shift: Shift, discordMessageId: string) => {
+export const addShift = db.transaction((shift: Shift) => {
 	const referentId = getMemberId(shift.referentLogin);
-	const shiftId = insertShift(referentId, shift.date, discordMessageId).lastInsertRowid;
+	const shiftId = insertShift(referentId, shift.date).lastInsertRowid;
 	addShiftParticipants(shiftId, shift.presences);
+	return shiftId;
 })
+
+const setShiftMessageIdStmt = db.prepare<{ shiftId: number | bigint, discordMessageId: string }>(`--sql
+	UPDATE shifts SET discord_message_id = @discordMessageId WHERE id = @shiftId
+`);
+
+export const setShiftMessageId = db.transaction((shiftId: number | bigint, discordMessageId: string) => {
+	setShiftMessageIdStmt.run({ shiftId, discordMessageId });
+});
