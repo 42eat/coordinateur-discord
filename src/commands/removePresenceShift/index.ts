@@ -12,7 +12,7 @@ const reloadCommand: DiscordCommand = {
 		.setName("remove-presence")
 		.addStringOption(opt => opt.setName("date").setRequired(true).setAutocomplete(true).setDescription("Date du shift"))
 		.setDescription("Supprime une présence shift"),
-	filters: { admin: true },
+	filters: { admin: false },
 	async execute(interaction) {
 		const date = interaction.options.getString("date", true);
 
