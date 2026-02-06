@@ -1,4 +1,8 @@
-import { ActionRowBuilder, ButtonBuilder, SlashCommandBuilder } from "discord.js";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	SlashCommandBuilder,
+} from "discord.js";
 import { DiscordCommand } from "../../structures/DiscordCommand";
 import { onShiftDateAutocomplete } from "../utils/autoComplete/shiftDate";
 import { getShiftsByDate } from "../../db/actions/shifts/getShift";
@@ -12,13 +16,22 @@ const periodOrder = ["noon", "evening"];
 const reloadCommand: DiscordCommand = {
 	data: new SlashCommandBuilder()
 		.setName("remove-presence")
-		.addStringOption(opt => opt.setName("date").setRequired(true).setAutocomplete(true).setDescription("Date du shift"))
+		.addStringOption((opt) =>
+			opt
+				.setName("date")
+				.setRequired(true)
+				.setAutocomplete(true)
+				.setDescription("Date du shift"),
+		)
 		.setDescription("Supprime une présence shift"),
 	filters: { admin: false },
 	async execute(interaction) {
 		const date = interaction.options.getString("date", true);
 
-		const shifts = getShiftsByDate(date).sort((shiftA, shiftB) => periodOrder.indexOf(shiftA.date.period) - periodOrder.indexOf(shiftB.date.period));
+		const shifts = getShiftsByDate(date).sort(
+			(shiftA, shiftB) =>
+				periodOrder.indexOf(shiftA.date.period) - periodOrder.indexOf(shiftB.date.period),
+		);
 
 		const buttons: Array<ButtonBuilder> = [];
 
@@ -26,23 +39,25 @@ const reloadCommand: DiscordCommand = {
 			buttons.push(
 				removePresenceButton
 					.setupButton(new ButtonBuilder(), shift.id.toString())
-					.setLabel(displayPeriodMap[shift.date.period])
+					.setLabel(displayPeriodMap[shift.date.period]),
 			);
 		}
 
 		buttons.push(
 			deleteMessageButton
 				.setupButton(new ButtonBuilder())
-				.setLabel("Annuler")
-		)
+				.setLabel("Annuler"),
+		);
 
-		const component = new ActionRowBuilder<ButtonBuilder>().addComponents(buttons)
+		const component = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			buttons,
+		);
 		interaction.reply({
 			embeds: [createShiftChoiceEmbed(shifts)],
-			components: [component]
-		})
+			components: [component],
+		});
 	},
-	onAutoComplete: onShiftDateAutocomplete
+	onAutoComplete: onShiftDateAutocomplete,
 };
 
 export default reloadCommand;

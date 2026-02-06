@@ -1,6 +1,6 @@
 import { db } from "../../database";
 
-const getShiftMessageIdStmt = db.prepare<{ id: number }, { discordMessageId: string }>(`--sql
+const getShiftMessageIdStmt = db.prepare<{ id: number }, { discordMessageId: string | null }>(`--sql
 	SELECT discord_message_id as discordMessageId FROM shifts WHERE id = @id
 `)
 

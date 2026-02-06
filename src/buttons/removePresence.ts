@@ -4,6 +4,7 @@ import { deleteShiftById } from "../db/actions/shifts/removeShift";
 import { DiscordButton } from "../structures/DiscordButton";
 import { createButton } from ".";
 import { getShiftMessageId } from "../db/actions/shifts/getShiftMessageId";
+import { ResponseError } from "../structures/ResponseError";
 
 export const removePresenceButton = createButton({
 	name: "remove-presence",
@@ -16,9 +17,14 @@ export const removePresenceButton = createButton({
 	async execute(interaction, shiftId) {
 		const presenceMessageId = getShiftMessageId(parseInt(shiftId));
 		deleteShiftById(parseInt(shiftId));
-		const message = await interaction.channel?.messages.fetch(presenceMessageId);
-		await message?.delete()
-		await interaction.reply({ content: "Shift was removed", flags: "Ephemeral" });
-		await interaction.message.delete();
+		try {
+
+			if (presenceMessageId) {
+				const message = await interaction.channel?.messages.fetch(presenceMessageId);
+				await message?.delete()
+			}
+		} catch { }
+		interaction.reply({ content: "Shift was removed", flags: "Ephemeral" });
+		interaction.message.delete().catch(() => { throw new ResponseError("Remove message couldn't be delete.") });
 	}
 }) satisfies DiscordButton;
